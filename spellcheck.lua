@@ -15,7 +15,6 @@ function spellcheck(file, range)
 	-- skip header line
 	word_corrections()
 
-
 	local orig = file:content(range)
 	local new = orig:gsub("%S+", function(w)
 		local correction = word_corrections()
@@ -23,11 +22,13 @@ function spellcheck(file, range)
 		if correction == "" then
 			correction = word_corrections()
 		end
-		if correction ~= "*" then
+		if correction and correction ~= "*" then
 			-- get corrections
-			local orig, pos, sug = correction:match("& (%w+) %d+ (%d+): (.*)")
+			local orig, pos, sug = correction:match("& (%S+) %d+ (%d+): (.*)")
 			if orig ~= w then
-				return 1, "Bad things happend!! Correction is not for" .. w
+				orig = orig or "nil"
+				print("Bad things happend!! Correction: " .. orig  .. " is not for " .. w)
+				return w
 			end
 			-- select a correction
 			local cmd = 'printf "' .. sug:gsub(", ", "\\n") .. '\\n" | vis-menu'
@@ -39,20 +40,42 @@ function spellcheck(file, range)
 			if correction then
 				return correction
 			end
+		else
+			print("Bad things happend!! No correction available for " .. w)
 		end
 	end)
 
-	file:delete(range)
-	file:insert(range.start, new)
+	if orig ~= new then
+		file:delete(range)
+		file:insert(range.start, new)
+	end
 end
 
 vis:map(vis.modes.NORMAL, "<C-s>", function(keys)
-	local file = vis.win.file
-	ret, err = spellcheck(file, { start=1, finish=file.size })
+	local win = vis.win
+	local file = win.file
+	ret, err = spellcheck(file, { start=0, finish=file.size })
 	if ret then
 		vis:info(err)
 	end
+	win:draw()
 	return 0
 end, "Spellcheck the whole file")
+
+vis:map(vis.modes.NORMAL, "<C-w>", function(keys)
+	local win = vis.win
+	local file = win.file
+	local pos = win.cursor.pos
+	if not pos then return end
+	local range = file:text_object_word(pos > 0 and pos-1 or pos);
+	if not range then return end
+	if range.start == range.finish then return end
+	ret, err = spellcheck(file, range)
+	if ret then
+		vis:info(err)
+	end
+	win:draw()
+	return 0
+end, "Spellcheck word")
 
 return module
