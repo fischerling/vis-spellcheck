@@ -15,7 +15,7 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 
 The module table returned from `require(...)` has two configuration fields
 `lang` and `cmd`. `lang` is inserted in the `cmd` string at `%s`.
-The defaults are `enchant -d %s` and `$LANG or "en_US".
+The defaults are `enchant -d %s` and `$LANG` or `en_US`.
 
 	spell = require(...)
 	spell.cmd = "aspell -l %s -a"
