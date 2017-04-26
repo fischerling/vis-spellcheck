@@ -1,3 +1,6 @@
+-- Copyright (c) 2017 Florian Fischer. All rights reserved.
+-- Use of this source code is governed by a MIT license found in the LICENSE file.
+
 local module = {}
 module.lang = os.getenv("LANG"):sub(0,5) or "en_US"
 -- TODO use more spellcheckers (aspell/hunspell)
