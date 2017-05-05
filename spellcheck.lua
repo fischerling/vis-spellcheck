@@ -81,4 +81,10 @@ vis:map(vis.modes.NORMAL, "<C-w>", function(keys)
 	return 0
 end, "Spellcheck word")
 
+vis:option_register("spelllang", "string", function(value, toogle)
+	module.lang = value
+	vis:info("Spellchecking language is now "..value)
+	return true
+end, "The language used for spellchecking")
+
 return module
