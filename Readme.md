@@ -21,3 +21,8 @@ The defaults are `enchant -d %s` and `$LANG` or `en_US`.
 	spell = require(...)
 	spell.cmd = "aspell -l %s -a"
 	spell.lang = "en_US"
+
+During runtime:
+
+	:set spelllang en_US
+
