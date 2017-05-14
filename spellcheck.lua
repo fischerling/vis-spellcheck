@@ -4,7 +4,15 @@
 local module = {}
 module.lang = os.getenv("LANG"):sub(0,5) or "en_US"
 -- TODO use more spellcheckers (aspell/hunspell)
-module.cmd = "enchant -d %s -a"
+if os.execute("type enchant &>/dev/null") then
+	module.cmd = "enchant -d %s -a"
+elseif os.execute("type aspell &>/dev/null") then
+	module.cmd = "aspell -l %s -a"
+elseif os.execute("type hunspell &>/dev/null") then
+	module.cmd = "hunspell -d %s"
+else
+   return nil
+end
 
 function spellcheck(file, range)
 	local cmd = module.cmd:format(module.lang)
