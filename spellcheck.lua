@@ -36,9 +36,13 @@ function spellcheck(file, range)
 		if correction and correction ~= "*" then
 			-- get corrections
 			local orig, pos, sug = correction:match("& (%S+) %d+ (%d+): (.*)")
+			if not orig then
+				orig = correction:match("# (%S+).*")
+				vis:info("No correction availlable for " .. orig .. ".")
+			end
 			if orig ~= w then
 				orig = orig or "nil"
-				print("Bad things happend!! Correction: " .. orig  .. " is not for " .. w)
+				vis:message("Bad things happend!! Correction: " .. orig  .. " is not for " .. w)
 				return w
 			end
 			-- select a correction
@@ -51,8 +55,6 @@ function spellcheck(file, range)
 			if correction then
 				return correction
 			end
-		else
-			print("Bad things happend!! No correction available for " .. w)
 		end
 	end)
 
@@ -62,7 +64,7 @@ function spellcheck(file, range)
 	end
 end
 
-vis:map(vis.modes.NORMAL, "<C-s>", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>a", function(keys)
 	local win = vis.win
 	local file = win.file
 	ret, err = spellcheck(file, { start=0, finish=file.size })
@@ -73,19 +75,25 @@ vis:map(vis.modes.NORMAL, "<C-s>", function(keys)
 	return 0
 end, "Spellcheck the whole file")
 
-vis:map(vis.modes.NORMAL, "<C-w>", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	local win = vis.win
 	local file = win.file
-	local pos = win.cursor.pos
+
+	local pos = win.selection.pos
 	if not pos then return end
 	local range = file:text_object_word(pos > 0 and pos-1 or pos);
 	if not range then return end
 	if range.start == range.finish then return end
+
 	ret, err = spellcheck(file, range)
 	if ret then
 		vis:info(err)
 	end
+
+	win.selection.pos = pos
+
 	win:draw()
+
 	return 0
 end, "Spellcheck word")
 
