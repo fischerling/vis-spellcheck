@@ -9,8 +9,8 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 
 ## usage
 
-+ To correct the whole file press Ctrl+s in normal mode.
-+ To correct the word under the curser press Ctrl+w in normal mode.
++ To correct the whole file press `<Ctrl+w><a>` in normal mode.
++ To correct the word under the curser press `<Ctrl+w><w>` in normal mode.
 
 ## configuration
 
