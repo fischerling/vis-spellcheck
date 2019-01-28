@@ -124,7 +124,7 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	win:draw()
 
 	return 0
-end, "Correct missspelled word")
+end, "Correct misspelled word")
 
 vis:map(vis.modes.NORMAL, "<C-w>i", function(keys)
 	local win = vis.win
@@ -139,9 +139,9 @@ vis:map(vis.modes.NORMAL, "<C-w>i", function(keys)
 
 	win:draw()
 	return 0
-end, "Ignore missspelled word")
+end, "Ignore misspelled word")
 
-vis:option_register("spelllang", "string", function(value, toogle)
+vis:option_register("spelllang", "string", function(value, toggle)
 	spellcheck.lang = value
 	vis:info("Spellchecking language is now "..value)
 	-- force new highlight
