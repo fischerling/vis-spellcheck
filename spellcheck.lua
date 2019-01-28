@@ -26,7 +26,7 @@ local ignored = {}
 local last_viewport, last_typos = nil, nil
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
-	if not spellcheck.enabled[win] or not win:style_define(win.STYLE_INFO, "fore:red") then
+	if not spellcheck.enabled[win] or not win:style_define(42, "fore:red") then
 		return false
 	end
 	local viewport = win.viewport
@@ -53,7 +53,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	for typo in corrections_iter do
 		if not ignored[typo] then
 			local start, finish = viewport_text:find(typo, index, true)
-			win:style(win.STYLE_INFO, viewport.start + start - 1, viewport.start + finish)
+			win:style(42, viewport.start + start - 1, viewport.start + finish)
 			index = finish
 		end
 	end
