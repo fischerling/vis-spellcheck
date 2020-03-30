@@ -115,7 +115,7 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	f:close()
 	-- trim correction
 	correction = correction:match("^%s*(.-)%s*$")
-	if correction then
+	if correction ~= "" then
 		win.file:delete(range)
 		win.file:insert(range.start, correction)
 	end
