@@ -24,7 +24,7 @@ spellcheck.enabled = {}
 
 local ignored = {}
 
-local last_viewport, last_typos = nil, nil
+local last_viewport, last_typos = nil, ""
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	if not spellcheck.enabled[win] or not win:style_define(42, "fore:red") then
@@ -44,7 +44,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 			vis:message("calling " .. cmd .. " failed ("..se..")")
 			return false
 		end
-		typos = so
+		typos = so or ""
 	end
 
 	local corrections_iter = typos:gmatch("(.-)\n")
