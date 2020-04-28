@@ -74,6 +74,19 @@ vis:map(vis.modes.NORMAL, "<C-w>d", function(keys)
 	return 0
 end, "Disable spellchecking in the current window")
 
+-- toggle spellchecking on <F7>
+-- <F7> is used by some word processors (LibreOffice) for spellchecking
+-- Thanks to @leorosa for the hint.
+vis:map(vis.modes.NORMAL, "<F7>", function(keys)
+	if not spellcheck.enabled[vis.win] then
+		spellcheck.enabled[vis.win] = true
+	else
+		spellcheck.enabled[vis.win] = nil
+		vis.win:draw()
+	end
+	return 0
+end, "Toggle spellchecking in the current window")
+
 vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	local win = vis.win
 	local file = win.file
