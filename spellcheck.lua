@@ -48,8 +48,6 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	end
 
 	local corrections_iter = typos:gmatch("(.-)\n")
-	-- skip header line
-	corrections_iter()
 	local index = 0
 	for typo in corrections_iter do
 		if not ignored[typo] then
