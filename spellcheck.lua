@@ -28,7 +28,42 @@ spellcheck.check_tokens = {
 	[vis.lexers.COMMENT] = true
 }
 
+
+-- Return nil or a string of misspelled word in a specific file range
+-- by calling the spellchecker's list command.
+-- The returned string consists of each misspell followed by a newline.
+local function get_typos(range)
+	local cmd = spellcheck.list_cmd:format(spellcheck.lang)
+	local ret, so, se = vis:pipe(vis.win.file, range, cmd)
+	if ret ~= 0 then
+		vis:info("calling " .. cmd .. " failed ("..ret..")")
+		return nil
+	end
+	return so
+end
+
+-- plugin global list of ignored typos
 local ignored = {}
+
+
+-- Return an iterator over all not ignored typos and their positions in text.
+-- The returned iterator is a seelf contained statefull iterator function closure.
+-- Which will return the next typo and ist start and finish in the text, starting by 1.
+local function typo_iter(text, typos, ignored)
+	local index = 0
+	local unfiltered_iterator, iter_state = typos:gmatch("(.-)\n")
+	return function(foo, bar)
+		repeat
+			typo = unfiltered_iterator(iter_state)
+		until(not typo or not ignored[typo])
+
+		if typo then
+			local start, finish = text:find(typo, index, true)
+			index = finish
+			return typo, start, finish
+		end
+	end
+end
 
 local last_viewport, last_typos = nil, ""
 
@@ -44,23 +79,11 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	if last_viewport == viewport_text then
 		typos = last_typos
 	else
-		local cmd = spellcheck.list_cmd:format(spellcheck.lang)
-		local ret, so, se = vis:pipe(win.file, viewport, cmd)
-		if ret ~= 0 then
-			vis:message("calling " .. cmd .. " failed ("..se..")")
-			return false
-		end
-		typos = so or ""
+		typos = get_typos(viewport) or ""
 	end
 
-	local corrections_iter = typos:gmatch("(.-)\n")
-	local index = 1
-	for typo in corrections_iter do
-		if not ignored[typo] then
-			local start, finish = viewport_text:find(typo, index, true)
-			win:style(42, viewport.start + start - 1, viewport.start + finish)
-			index = finish
-		end
+	for typo, start, finish in typo_iter(viewport_text, typos, ignored) do
+		win:style(42, viewport.start + start - 1, viewport.start + finish)
 	end
 
 	last_viewport = viewport_text
