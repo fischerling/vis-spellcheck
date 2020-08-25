@@ -16,7 +16,7 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 
 ## configuration
 
-The module table returned from `require(...)` has three configuration options:
+The module table returned from `require(...)` has some configuration options:
 
 * `cmd`: cmd that is passed to popen() and must return word corrections in Ispell format.
 	* default: `enchant -d %s` 
@@ -24,6 +24,8 @@ The module table returned from `require(...)` has three configuration options:
 	* default: `enchant -l -d %s` 
 * `lang`: The name of the used dictionary. `lang` is inserted in the cmd-strings at `%s`.
 	* default: `$LANG` or `en_US`
+* `typo_style`: The style string with which misspellings should be highlighted
+	* default: `fore:red`
 
 A possible configuration could look like this:
 

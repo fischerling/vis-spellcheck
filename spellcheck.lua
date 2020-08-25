@@ -20,6 +20,7 @@ else
    return nil
 end
 
+spellcheck.typo_style = "fore:red"
 spellcheck.enabled = {}
 
 local ignored = {}
@@ -27,7 +28,7 @@ local ignored = {}
 local last_viewport, last_typos = nil, ""
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
-	if not spellcheck.enabled[win] or not win:style_define(42, "fore:red") then
+	if not spellcheck.enabled[win] or not win:style_define(42, spellcheck.typo_style) then
 		return false
 	end
 	local viewport = win.viewport
