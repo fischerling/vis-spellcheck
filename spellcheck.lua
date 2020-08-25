@@ -21,14 +21,19 @@ else
 end
 
 spellcheck.typo_style = "fore:red"
-spellcheck.enabled = {}
+spellcheck.check_full_viewport = {}
+
+spellcheck.check_tokens = {
+	[vis.lexers.STRING] = true,
+	[vis.lexers.COMMENT] = true
+}
 
 local ignored = {}
 
 local last_viewport, last_typos = nil, ""
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
-	if not spellcheck.enabled[win] or not win:style_define(42, spellcheck.typo_style) then
+	if not spellcheck.check_full_viewport[win] or not win:style_define(42, spellcheck.typo_style) then
 		return false
 	end
 	local viewport = win.viewport
@@ -63,26 +68,144 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	return true
 end)
 
+local wrapped_lex_funcs = {}
+
+local wrap_lex_func = function(old_lex_func)
+	return function(lexer, data, index, redrawtime_max)
+		-- vis:info("hooked lexer.lex")
+		local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
+
+		-- quit early if the lexer already took to long
+		-- TODO: investigate further if timedout is actually set by the lexer.
+		--       As I understand lpeg.match used by lexer.lex timedout will always be nil
+		if timeout then
+			return tokens, timedout
+		end
+
+		local log = nil
+		local win = vis.win
+		local cmd = spellcheck.list_cmd:format(spellcheck.lang)
+		local new_tokens = {}
+
+		-- get file position we lex
+		-- duplicated code with vis-std.lua
+		local viewport = win.viewport
+		local horizon_max = win.horizon or 32768
+		local horizon = viewport.start < horizon_max and viewport.start or horizon_max
+		local view_start = viewport.start
+		local lex_start = viewport.start - horizon
+		local token_end = lex_start + (tokens[#tokens] or 1) - 1
+
+		for i = 1, #tokens - 1, 2 do
+			local token_start = lex_start + (tokens[i-1] or 1) - 1
+			local token_end = tokens[i+1]
+			local token_range = {start = token_start, finish = token_end - 1}
+
+			-- check if token is visable
+			if token_start >= view_start or token_end > view_start then
+				local token_name = tokens[i]
+				-- token is not listed for spellchecking just add it to the token stream
+				if not spellcheck.check_tokens[token_name] then
+					table.insert(new_tokens, tokens[i])
+					table.insert(new_tokens, token_end)
+				-- spellcheck the token
+				else
+					local ret, stdout, stderr = vis:pipe(win.file, token_range, cmd)
+					if ret ~= 0 then
+						vis:info("calling cmd: `" .. cmd .. "` failed ("..ret..")")
+					-- we got misspellings
+					elseif stdout then
+						local typo_iter = stdout:gmatch("(.-)\n")
+						local token_content = win.file:content(token_range)
+
+						-- current position in token_content
+						local index = 1
+						for typo in typo_iter do
+							if not ignored[typo] then
+								local start, finish = token_content:find(typo, index, true)
+								-- split token
+								local pre_typo_end = start - 1
+								-- correct part before typo
+								if pre_typo_end > index then
+									table.insert(new_tokens, token_name)
+									table.insert(new_tokens, token_start + pre_typo_end)
+								end
+								-- typo
+								-- TODO make style configurable
+								table.insert(new_tokens, vis.lexers.ERROR)
+								table.insert(new_tokens, token_start + finish + 1)
+								index = finish
+							end
+						end
+						-- rest which is not already inserted into the token stream
+						table.insert(new_tokens, token_name)
+						table.insert(new_tokens, token_end)
+					-- found no misspellings just add it to the token stream
+					else
+						table.insert(new_tokens, token_name)
+						table.insert(new_tokens, token_end)
+					end
+					-- comment with mispellings anf oter stuf
+				end
+			end
+		end
+		return new_tokens, timedout
+	end
+end
+
+local enable_spellcheck = function()
+	-- prevent wrapping the lex function multiple times
+	if wrapped_lex_funcs[vis.win] then
+		return
+	end
+
+	if vis.win.syntax and vis.lexers.load then
+		local lexer = vis.lexers.load(vis.win.syntax, nil, true)
+		if lexer and lexer.lex then
+			local old_lex_func = lexer.lex
+			wrapped_lex_funcs[vis.win] = old_lex_func
+			lexer.lex = wrap_lex_func(old_lex_func)
+			return
+		end
+	end
+
+	-- fallback check spellcheck the full viewport
+	spellcheck.check_full_viewport[vis.win] = true
+end
+
+local is_spellcheck_enabled = function()
+	return spellcheck.check_full_viewport[vis.win] or wrapped_lex_funcs[vis.win]
+end
+
 vis:map(vis.modes.NORMAL, "<C-w>e", function(keys)
-	spellcheck.enabled[vis.win] = true
-	return 0
+	enable_spellcheck()
 end, "Enable spellchecking in the current window")
 
+local disable_spellcheck = function()
+	local old_lex_func = wrapped_lex_funcs[vis.win]
+	if old_lex_func then
+		local lexer = vis.lexers.load(vis.win.syntax, nil, true)
+		lexer.lex = old_lex_func
+		wrapped_lex_funcs[vis.win] = nil
+	else
+		spellcheck.check_full_viewport[vis.win] = nil
+	end
+end
+
 vis:map(vis.modes.NORMAL, "<C-w>d", function(keys)
-	spellcheck.enabled[vis.win] = nil
+	disable_spellcheck()
 	-- force new highlight
 	vis.win:draw()
-	return 0
 end, "Disable spellchecking in the current window")
 
 -- toggle spellchecking on <F7>
 -- <F7> is used by some word processors (LibreOffice) for spellchecking
 -- Thanks to @leorosa for the hint.
 vis:map(vis.modes.NORMAL, "<F7>", function(keys)
-	if not spellcheck.enabled[vis.win] then
-		spellcheck.enabled[vis.win] = true
+	if not is_spellcheck_enabled() then
+		enable_spellcheck()
 	else
-		spellcheck.enabled[vis.win] = nil
+		disable_spellcheck()
 		vis.win:draw()
 	end
 	return 0
