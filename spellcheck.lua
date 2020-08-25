@@ -49,7 +49,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	end
 
 	local corrections_iter = typos:gmatch("(.-)\n")
-	local index = 0
+	local index = 1
 	for typo in corrections_iter do
 		if not ignored[typo] then
 			local start, finish = viewport_text:find(typo, index, true)
