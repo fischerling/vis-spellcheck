@@ -29,6 +29,8 @@ The module table returned from `require(...)` has some configuration options:
 	* default: `fore:red`
 * `check_tokens`: A table mapping all token names we consider for spellchecking to true
 	* default: `{[vis.lexers.STRING]=true, [vis.lexers.COMMENT]=true}`
+* `disable_syntax_awareness`: Disable the syntax aware spellchecking and use always _full viewport_
+	* default: `false`
 
 A possible configuration could look like this:
 

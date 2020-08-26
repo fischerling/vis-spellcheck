@@ -24,6 +24,7 @@ end
 
 spellcheck.typo_style = "fore:red"
 spellcheck.check_full_viewport = {}
+spellcheck.disable_syntax_awareness = false
 
 spellcheck.check_tokens = {
 	[vis.lexers.STRING] = true,
@@ -203,7 +204,7 @@ local enable_spellcheck = function()
 		return
 	end
 
-	if vis.win.syntax and vis.lexers.load then
+	if not spellcheck.disable_syntax_awareness and vis.win.syntax and vis.lexers.load then
 		local lexer = vis.lexers.load(vis.win.syntax, nil, true)
 		if lexer and lexer.lex then
 			local old_lex_func = lexer.lex
