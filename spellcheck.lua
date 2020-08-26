@@ -123,7 +123,6 @@ local wrapped_lex_funcs = {}
 
 local wrap_lex_func = function(old_lex_func)
 	return function(lexer, data, index, redrawtime_max)
-		-- vis:info("hooked lexer.lex")
 		local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
 
 		-- quit early if the lexer already took to long
@@ -133,9 +132,7 @@ local wrap_lex_func = function(old_lex_func)
 			return tokens, timedout
 		end
 
-		local log = nil
 		local win = vis.win
-		local cmd = spellcheck.list_cmd:format(spellcheck.lang)
 		local new_tokens = {}
 
 		-- get file position we lex
