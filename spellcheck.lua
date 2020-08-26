@@ -53,7 +53,7 @@ local function get_typos(range_or_text)
 			return nil
 		end
 
-		local tmp_file = io.open(tmp_name, "r")
+		local tmp_file = assert(io.open(tmp_name, "r"))
 		typos = tmp_file:read("*a")
 		tmp_file:close()
 		os.remove(tmp_name)
@@ -304,7 +304,7 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 
 	-- select a correction
 	local cmd = 'printf "' .. suggestions:gsub(", ", "\\n") .. '\\n" | vis-menu'
-	local f = io.popen(cmd)
+	local f = assert(io.popen(cmd))
 	local correction = f:read("*all")
 	f:close()
 	-- trim correction
