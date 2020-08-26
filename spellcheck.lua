@@ -31,22 +31,48 @@ spellcheck.check_tokens = {
 }
 
 
--- Return nil or a string of misspelled word in a specific file range
+-- Return nil or a string of misspelled word in a specific file range or text
 -- by calling the spellchecker's list command.
+-- If given a range we will use vis:pipe to get our typos from the spellchecker.
+-- If a string was passed we call the spellchecker ourself and redirect its stdout
+-- to a temporary file. See http://lua-users.org/lists/lua-l/2007-10/msg00189.html.
 -- The returned string consists of each misspell followed by a newline.
-local function get_typos(range)
+local function get_typos(range_or_text)
 	local cmd = spellcheck.list_cmd:format(spellcheck.lang)
-	local ret, so, se = vis:pipe(vis.win.file, range, cmd)
-	if ret ~= 0 then
-		vis:info("calling " .. cmd .. " failed ("..ret..")")
-		return nil
+	local typos = nil
+	if type(range_or_text) == "string" then
+		local text = range_or_text
+		local tmp_name = os.tmpname()
+		local full_cmd = cmd .. "> " .. tmp_name .. supress_stderr
+		local proc = assert(io.popen(full_cmd, "w"))
+		proc:write(text)
+		-- this error detection may need lua5.2
+		local success, reason, exit_code = proc:close()
+		if not success then
+			vis:info("calling " .. cmd .. " failed ("..exit_code..")")
+			return nil
+		end
+
+		local tmp_file = io.open(tmp_name, "r")
+		typos = tmp_file:read("*a")
+		tmp_file:close()
+		os.remove(tmp_name)
+	else
+		local range = range_or_text
+		local ret, so, se = vis:pipe(vis.win.file, range, cmd)
+
+		if ret ~= 0 then
+			vis:info("calling " .. cmd .. " failed ("..ret..")")
+			return nil
+		end
+		typos = so
 	end
-	return so
+
+	return typos
 end
 
 -- plugin global list of ignored typos
 local ignored = {}
-
 
 -- Return an iterator over all not ignored typos and their positions in text.
 -- The returned iterator is a seelf contained statefull iterator function closure.
