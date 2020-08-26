@@ -205,7 +205,7 @@ local wrap_lex_func = function(old_lex_func)
 					table.insert(new_tokens, vis.lexers.ERROR)
 					table.insert(new_tokens, typo_end + 1)
 				end
-			until(not token_end or token_end > typo_end)
+			until(not token_end or token_end >= typo_end)
 		end
 
 		-- add tokens left after we handled all typos
