@@ -122,6 +122,10 @@ end)
 local wrapped_lex_funcs = {}
 
 local wrap_lex_func = function(old_lex_func)
+	local old_viewport = vis.win.viewport
+	local old_viewport_text = ""
+	local old_typos = {}
+
 	return function(lexer, data, index, redrawtime_max)
 		local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
 
@@ -135,68 +139,75 @@ local wrap_lex_func = function(old_lex_func)
 		local win = vis.win
 		local new_tokens = {}
 
-		-- get file position we lex
+		-- get possible file position we lex
 		-- duplicated code with vis-std.lua
+		-- this is totally broken and unsound
+		-- to be sound we have to spellcheck all data that was passed to us
+		-- investigate if a stateless approach is much slower
 		local viewport = win.viewport
 		local horizon_max = win.horizon or 32768
 		local horizon = viewport.start < horizon_max and viewport.start or horizon_max
 		local view_start = viewport.start
 		local lex_start = viewport.start - horizon
-		local token_end = lex_start + (tokens[#tokens] or 1) - 1
 
-		for i = 1, #tokens - 1, 2 do
-			local token_start = lex_start + (tokens[i-1] or 1) - 1
-			local token_end = tokens[i+1]
-			local token_range = {start = token_start, finish = token_end - 1}
+		local viewport_text = data:sub(view_start)
 
-			-- check if token is visable
-			if token_start >= view_start or token_end > view_start then
-				local token_name = tokens[i]
-				-- token is not listed for spellchecking just add it to the token stream
-				if not spellcheck.check_tokens[token_name] then
-					table.insert(new_tokens, tokens[i])
-					table.insert(new_tokens, token_end)
-				-- spellcheck the token
-				else
-					local ret, stdout, stderr = vis:pipe(win.file, token_range, cmd)
-					if ret ~= 0 then
-						vis:info("calling cmd: `" .. cmd .. "` failed ("..ret..")")
-					-- we got misspellings
-					elseif stdout then
-						local typo_iter = stdout:gmatch("(.-)\n")
-						local token_content = win.file:content(token_range)
-
-						-- current position in token_content
-						local index = 1
-						for typo in typo_iter do
-							if not ignored[typo] then
-								local start, finish = token_content:find(typo, index, true)
-								-- split token
-								local pre_typo_end = start - 1
-								-- correct part before typo
-								if pre_typo_end > index then
-									table.insert(new_tokens, token_name)
-									table.insert(new_tokens, token_start + pre_typo_end)
-								end
-								-- typo
-								-- TODO make style configurable
-								table.insert(new_tokens, vis.lexers.ERROR)
-								table.insert(new_tokens, token_start + finish + 1)
-								index = finish
-							end
-						end
-						-- rest which is not already inserted into the token stream
-						table.insert(new_tokens, token_name)
-						table.insert(new_tokens, token_end)
-					-- found no misspellings just add it to the token stream
-					else
-						table.insert(new_tokens, token_name)
-						table.insert(new_tokens, token_end)
-					end
-					-- comment with mispellings anf oter stuf
-				end
-			end
+		local typos = ""
+		if old_viewport.start ~= view_start
+			or old_viewport.finish ~= viewport.finish
+			or old_viewport_text ~= viewport_text
+		then
+			typos = get_typos(viewport_text)
+			old_typos = typos
+			old_viewport = viewport
+			old_viewport_text = viewport_text
+		else
+			typos = old_typos
 		end
+
+		local i = 1
+		for typo, start, finish in typo_iter(viewport_text, typos, ignored) do
+			local typo_start = view_start + start
+			local typo_end = view_start + finish
+			repeat
+				-- no tokens left
+				if i > #tokens -1 then
+					break
+				end
+
+				local token_type = tokens[i]
+				local token_start = lex_start + (tokens[i-1] or 1) - 1
+				local token_end = tokens[i+1]
+
+				-- the current token ends before our typo -> append to new stream
+				-- or is not spellchecked
+				if token_end < typo_start or not spellcheck.check_tokens[token_type] then
+					table.insert(new_tokens, token_type)
+					table.insert(new_tokens, token_end)
+
+					-- done with this token -> advance token stream
+					i = i + 2
+				-- typo and checked token overlap
+				else
+					local pre_typo_end = typo_start - 1
+					-- unchanged token part before typo
+					if pre_typo_end > token_start then
+						table.insert(new_tokens, token_type)
+						table.insert(new_tokens, pre_typo_end + 1)
+					end
+
+					-- highlight typo
+					table.insert(new_tokens, vis.lexers.ERROR)
+					table.insert(new_tokens, typo_end + 1)
+				end
+			until(not token_end or token_end > typo_end)
+		end
+
+		-- add tokens left after we handled all typos
+		for i = i, #tokens, 1 do
+			table.insert(new_tokens, tokens[i])
+		end
+
 		return new_tokens, timedout
 	end
 end
