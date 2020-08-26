@@ -75,8 +75,8 @@ end
 local ignored = {}
 
 -- Return an iterator over all not ignored typos and their positions in text.
--- The returned iterator is a seelf contained statefull iterator function closure.
--- Which will return the next typo and ist start and finish in the text, starting by 1.
+-- The returned iterator is a self contained statefull iterator function closure.
+-- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored)
 	local index = 0
 	local unfiltered_iterator, iter_state = typos:gmatch("(.-)\n")
