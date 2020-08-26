@@ -127,9 +127,8 @@ end)
 local wrapped_lex_funcs = {}
 
 local wrap_lex_func = function(old_lex_func)
-	local old_viewport = vis.win.viewport
-	local old_viewport_text = ""
-	local old_typos = {}
+	local old_data = ""
+	local old_new_tokens = ""
 
 	return function(lexer, data, index, redrawtime_max)
 		local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
@@ -141,39 +140,19 @@ local wrap_lex_func = function(old_lex_func)
 			return tokens, timedout
 		end
 
-		local win = vis.win
 		local new_tokens = {}
 
-		-- get possible file position we lex
-		-- duplicated code with vis-std.lua
-		-- this is totally broken and unsound
-		-- to be sound we have to spellcheck all data that was passed to us
-		-- investigate if a stateless approach is much slower
-		local viewport = win.viewport
-		local horizon_max = win.horizon or 32768
-		local horizon = viewport.start < horizon_max and viewport.start or horizon_max
-		local view_start = viewport.start
-		local lex_start = viewport.start - horizon
-
-		local viewport_text = data:sub(view_start)
-
 		local typos = ""
-		if old_viewport.start ~= view_start
-			or old_viewport.finish ~= viewport.finish
-			or old_viewport_text ~= viewport_text
+		if old_data ~= data
 		then
-			typos = get_typos(viewport_text)
-			old_typos = typos
-			old_viewport = viewport
-			old_viewport_text = viewport_text
+			typos = get_typos(data)
+			old_data = data
 		else
-			typos = old_typos
+			return old_new_tokens
 		end
 
 		local i = 1
-		for typo, start, finish in typo_iter(viewport_text, typos, ignored) do
-			local typo_start = view_start + start
-			local typo_end = view_start + finish
+		for typo, typo_start, typo_end in typo_iter(data, typos, ignored) do
 			repeat
 				-- no tokens left
 				if i > #tokens -1 then
@@ -181,7 +160,7 @@ local wrap_lex_func = function(old_lex_func)
 				end
 
 				local token_type = tokens[i]
-				local token_start = lex_start + (tokens[i-1] or 1) - 1
+				local token_start = (tokens[i-1] or 1) - 1
 				local token_end = tokens[i+1]
 
 				-- the current token ends before our typo -> append to new stream
@@ -213,6 +192,7 @@ local wrap_lex_func = function(old_lex_func)
 			table.insert(new_tokens, tokens[i])
 		end
 
+		old_new_tokens = new_tokens
 		return new_tokens, timedout
 	end
 end
