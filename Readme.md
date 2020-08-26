@@ -11,6 +11,7 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 
 + To enable highlighting of misspelled words press `<Ctrl-w>e` in normal mode.
 + To disable highlighting press `<Ctrl-w>d` in normal mode.
++ To toggle highlighting press `<F7>` in normal mode.
 + To correct the word under the cursor press `<Ctrl+w>w` in normal mode.
 + To ignore the word under the cursor press `<Ctrl+w>i` in normal mode.
 
@@ -24,8 +25,10 @@ The module table returned from `require(...)` has some configuration options:
 	* default: `enchant -l -d %s` 
 * `lang`: The name of the used dictionary. `lang` is inserted in the cmd-strings at `%s`.
 	* default: `$LANG` or `en_US`
-* `typo_style`: The style string with which misspellings should be highlighted
+* `typo_style`: The style string with which misspellings should be highlighted when using the _full viewport_ method
 	* default: `fore:red`
+* `check_tokens`: A table mapping all token names we consider for spellchecking to true
+	* default: `{[vis.lexers.STRING]=true, [vis.lexers.COMMENT]=true}`
 
 A possible configuration could look like this:
 
