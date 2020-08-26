@@ -86,9 +86,14 @@ local function typo_iter(text, typos, ignored)
 		until(not typo or not ignored[typo])
 
 		if typo then
-			local start, finish = text:find(typo, index, true)
+			-- to prevent typos from being found in correct words before them
+			-- ("stuff stuf", "broken ok", ...)
+			-- we match typos only when they are enclosed in non-letter characters.
+			local start, finish = text:find("[%A]" .. typo .. "[%A]", index)
 			index = finish
-			return typo, start, finish
+
+			-- ignore the first and last non letter character
+			return typo, start + 1, finish - 1
 		end
 	end
 end
