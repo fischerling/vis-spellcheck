@@ -3,17 +3,19 @@
 
 local spellcheck = {}
 spellcheck.lang = os.getenv("LANG"):sub(0,5) or "en_US"
-local supress_output = ">/dev/null 2>/dev/null"
-if os.execute("type enchant "..supress_output) then
+local supress_stdout = " >/dev/null"
+local supress_stderr = " 2>/dev/null"
+local supress_output = supress_stdout .. supress_stderr
+if os.execute("type enchant"..supress_output) then
 	spellcheck.cmd = "enchant -d %s -a"
 	spellcheck.list_cmd = "enchant -l -d %s -a"
-elseif os.execute("type enchant-2 "..supress_output) then
+elseif os.execute("type enchant-2"..supress_output) then
 	spellcheck.cmd = "enchant-2 -d %s -a"
 	spellcheck.list_cmd = "enchant-2 -l -d %s -a"
-elseif os.execute("type aspell "..supress_output) then
+elseif os.execute("type aspell"..supress_output) then
 	spellcheck.cmd = "aspell -l %s -a"
 	spellcheck.list_cmd = "aspell list -l %s -a"
-elseif os.execute("type hunspell "..supress_output) then
+elseif os.execute("type hunspell"..supress_output) then
 	spellcheck.cmd = "hunspell -d %s"
 	spellcheck.list_cmd = "hunspell -l -d %s"
 else
