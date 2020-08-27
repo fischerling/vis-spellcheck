@@ -91,6 +91,13 @@ local function typo_iter(text, typos, ignored)
 			-- ("stuff stuf", "broken ok", ...)
 			-- we match typos only when they are enclosed in non-letter characters.
 			local start, finish = text:find("[%A]" .. typo .. "[%A]", index)
+			-- the typo was not found by our pattern this means it must be the last word in the text
+			if not start then
+				start, finish = text:find("[%A]" .. typo .. "$", index)
+				if not start then
+					vis:info(string.format("typo %s not found after %d this must be a bug please report", typo, index))
+				end
+			end
 			index = finish
 
 			-- ignore the first and last non letter character
