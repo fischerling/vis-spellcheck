@@ -79,7 +79,7 @@ local ignored = {}
 -- The returned iterator is a self contained statefull iterator function closure.
 -- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored)
-	local index = 0
+	local index = 1
 	local unfiltered_iterator, iter_state = typos:gmatch("(.-)\n")
 	return function(foo, bar)
 		repeat
@@ -91,17 +91,30 @@ local function typo_iter(text, typos, ignored)
 			-- ("stuff stuf", "broken ok", ...)
 			-- we match typos only when they are enclosed in non-letter characters.
 			local start, finish = text:find("[%A]" .. typo .. "[%A]", index)
-			-- the typo was not found by our pattern this means it must be the last word in the text
+			-- typo was not found by our pattern this means it must be either
+			-- the first or last word in the text
 			if not start then
-				start, finish = text:find("[%A]" .. typo .. "$", index)
-				if not start then
-					vis:info(string.format("typo %s not found after %d this must be a bug please report", typo, index))
+				-- check start of text
+				if index == 1 then
+					start = index
+					finish = #typo
+				-- must be the end of text
+				else
+					start = #text - #typo + 1
+					finish = start + #typo - 1
 				end
+
+				if text:sub(start, finish) ~= typo then
+					vis:info(string.format("typo %s not where expected after %d at %d %d found: %s",
+						typo, index, start, finish, text:sub(start, finish)))
+				end
+			else
+				start = start + 1 -- ignore leading non letter char
+				finish = finish - 1 -- ignore trailing non letter char
 			end
 			index = finish
 
-			-- ignore the first and last non letter character
-			return typo, start + 1, finish - 1
+			return typo, start, finish
 		end
 	end
 end
