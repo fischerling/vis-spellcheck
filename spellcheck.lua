@@ -28,9 +28,9 @@ spellcheck.disable_syntax_awareness = false
 
 spellcheck.check_tokens = {
 	[vis.lexers.STRING] = true,
-	[vis.lexers.COMMENT] = true
+	[vis.lexers.COMMENT] = true,
+	[vis.lexers.DEFAULT] = true,
 }
-
 
 -- Return nil or a string of misspelled word in a specific file range or text
 -- by calling the spellchecker's list command.
