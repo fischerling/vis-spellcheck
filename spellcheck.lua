@@ -203,7 +203,13 @@ local wrap_lex_func = function(old_lex_func)
 
 					-- highlight typo
 					table.insert(new_tokens, vis.lexers.ERROR)
-					table.insert(new_tokens, typo_end + 1)
+					-- the typo spans multiple tokens
+					if token_end < typo_end then
+						table.insert(new_tokens, token_end + 1)
+						i = i + 2
+					else
+						table.insert(new_tokens, typo_end + 1)
+					end
 				end
 			until(not token_end or token_end >= typo_end)
 		end
