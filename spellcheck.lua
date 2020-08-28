@@ -86,7 +86,7 @@ local function typo_iter(text, typos, ignored)
 			typo = unfiltered_iterator(iter_state)
 		until(not typo or not ignored[typo])
 
-		if typo then
+		if typo and typo ~= "" then
 			-- to prevent typos from being found in correct words before them
 			-- ("stuff stuf", "broken ok", ...)
 			-- we match typos only when they are enclosed in non-letter characters.
