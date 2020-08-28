@@ -119,7 +119,7 @@ local function typo_iter(text, typos, ignored)
 	end
 end
 
-local last_viewport, last_typos = nil, ""
+local last_viewport, last_data, last_typos = nil, "", ""
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	if not spellcheck.check_full_viewport[win] or not win:style_define(42, spellcheck.typo_style) then
@@ -148,8 +148,7 @@ end)
 local wrapped_lex_funcs = {}
 
 local wrap_lex_func = function(old_lex_func)
-	local old_data = ""
-	local old_new_tokens = ""
+	local old_new_tokens = {}
 
 	return function(lexer, data, index, redrawtime_max)
 		local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
@@ -164,10 +163,10 @@ local wrap_lex_func = function(old_lex_func)
 		local new_tokens = {}
 
 		local typos = ""
-		if old_data ~= data
+		if last_data ~= data
 		then
 			typos = get_typos(data)
-			old_data = data
+			last_data = data
 		else
 			return old_new_tokens
 		end
@@ -351,8 +350,10 @@ end, "Ignore misspelled word")
 vis:option_register("spelllang", "string", function(value, toggle)
 	spellcheck.lang = value
 	vis:info("Spellchecking language is now "..value)
-	-- force new highlight
+	-- force new highlight for full viewport
 	last_viewport = nil
+	-- force new highlight for syntax aware
+	last_data = nil
 	return true
 end, "The language used for spellchecking")
 
