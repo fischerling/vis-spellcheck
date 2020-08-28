@@ -241,6 +241,8 @@ local enable_spellcheck = function()
 			local old_lex_func = lexer.lex
 			wrapped_lex_funcs[vis.win] = old_lex_func
 			lexer.lex = wrap_lex_func(old_lex_func)
+			-- reset last data to enforce new highlighting
+			last_data = ""
 			return
 		end
 	end
