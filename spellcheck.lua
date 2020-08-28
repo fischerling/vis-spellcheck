@@ -134,6 +134,9 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 		typos = last_typos
 	else
 		typos = get_typos(viewport) or ""
+		if not typos then
+			return false
+		end
 	end
 
 	for typo, start, finish in typo_iter(viewport_text, typos, ignored) do
@@ -166,6 +169,9 @@ local wrap_lex_func = function(old_lex_func)
 		if last_data ~= data
 		then
 			typos = get_typos(data)
+			if not typos then
+				return tokens, timedout
+			end
 			last_data = data
 		else
 			return old_new_tokens
