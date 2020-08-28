@@ -95,19 +95,19 @@ local function typo_iter(text, typos, ignored)
 			-- the first or last word in the text
 			if not start then
 				-- check start of text
-				if index == 1 then
-					start = index
-					finish = #typo
-				-- must be the end of text
-				else
+				start = 1
+				finish = #typo
+				-- typo is not the beginning must be the end of text
+				if text:sub(start, finish) ~= typo then
 					start = #text - #typo + 1
 					finish = start + #typo - 1
 				end
 
 				if text:sub(start, finish) ~= typo then
-					vis:info(string.format("typo %s not where expected after %d at %d %d found: %s",
-						typo, index, start, finish, text:sub(start, finish)))
+					vis:info(string.format("can't find typo %s after %d. Please report this bug.",
+										   typo, index))
 				end
+			-- our pettern [%A]typo[%A] found it
 			else
 				start = start + 1 -- ignore leading non letter char
 				finish = finish - 1 -- ignore trailing non letter char
