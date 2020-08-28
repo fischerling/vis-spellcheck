@@ -81,6 +81,31 @@ local ignored = {}
 local function typo_iter(text, typos, ignored)
 	local index = 1
 	local unfiltered_iterator, iter_state = typos:gmatch("(.-)\n")
+
+-- see https://stackoverflow.com/questions/6705872/how-to-escape-a-variable-in-lua
+	local escape_lua_pattern
+	do
+		local matches =
+			{
+				["^"] = "%^";
+				["$"] = "%$";
+				["("] = "%(";
+				[")"] = "%)";
+				["%"] = "%%";
+				["."] = "%.";
+				["["] = "%[";
+				["]"] = "%]";
+				["*"] = "%*";
+				["+"] = "%+";
+				["-"] = "%-";
+				["?"] = "%?";
+			}
+
+		escape_lua_pattern = function(s)
+			return (s:gsub(".", matches))
+		end
+	end
+
 	return function(foo, bar)
 		repeat
 			typo = unfiltered_iterator(iter_state)
@@ -90,7 +115,7 @@ local function typo_iter(text, typos, ignored)
 			-- to prevent typos from being found in correct words before them
 			-- ("stuff stuf", "broken ok", ...)
 			-- we match typos only when they are enclosed in non-letter characters.
-			local start, finish = text:find("[%A]" .. typo .. "[%A]", index)
+			local start, finish = text:find("[%A]" .. escape_lua_pattern(typo) .. "[%A]", index)
 			-- typo was not found by our pattern this means it must be either
 			-- the first or last word in the text
 			if not start then
