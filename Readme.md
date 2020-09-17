@@ -2,12 +2,12 @@
 
 A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis).
 
-## installation
+## Installation
 
 1. Download `spellcheck.lua` or clone this repository
 2. Load the plugin in your `visrc.lua` with `require(path/to/plugin/spellcheck)`
 
-## usage
+## Usage
 
 + To enable highlighting of misspelled words press `<Ctrl-w>e` in normal mode.
 + To disable highlighting press `<Ctrl-w>d` in normal mode.
@@ -15,7 +15,7 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 + To correct the word under the cursor press `<Ctrl+w>w` in normal mode.
 + To ignore the word under the cursor press `<Ctrl+w>i` in normal mode.
 
-## configuration
+## Configuration
 
 The module table returned from `require(...)` has some configuration options:
 
@@ -28,7 +28,7 @@ The module table returned from `require(...)` has some configuration options:
 * `typo_style`: The style string with which misspellings should be highlighted when using the _full viewport_ method
 	* default: `fore:red`
 * `check_tokens`: A table mapping all token names we consider for spellchecking to true
-	* default: `{[vis.lexers.STRING]=true, [vis.lexers.COMMENT]=true}`
+	* default: `{[vis.lexers.STRING]=true, [vis.lexers.COMMENT]=true, [vis.lexers.DEFAULT]=true}`
 * `disable_syntax_awareness`: Disable the syntax aware spellchecking and use always _full viewport_
 	* default: `false`
 
