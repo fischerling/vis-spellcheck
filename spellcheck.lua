@@ -348,12 +348,10 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 
 	-- select a correction
 	local cmd = 'printf "' .. suggestions:gsub(", ", "\\n") .. '\\n" | vis-menu'
-	local f = assert(io.popen(cmd))
-	local correction = f:read("*all")
-	f:close()
-	-- trim correction
-	correction = correction:match("^%s*(.-)%s*$")
-	if correction ~= "" then
+	local status, correction = vis:pipe(file, {start = 0, finish = 0}, cmd)
+	if status == 0 then
+		-- trim correction
+		correction = correction:match("^%s*(.-)%s*$")
 		win.file:delete(range)
 		win.file:insert(range.start, correction)
 	end
