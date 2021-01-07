@@ -374,6 +374,17 @@ vis:map(vis.modes.NORMAL, "<C-w>i", function(keys)
 
 	ignored[file:content(range)] = true
 
+	-- Check if we use our syntax aware spellcheck lex-closure
+	-- We must rebuild the closure because it captures ignored
+	-- to include the new addition
+	local old_lex_func = wrapped_lex_funcs[vis.win]
+	if old_lex_func then
+		local lexer = vis.lexers.load(vis.win.syntax, nil, true)
+		lexer.lex = wrap_lex_func(old_lex_func)
+		-- reset last data to enforce new highlighting
+		last_data = ""
+	end
+
 	win:draw()
 	return 0
 end, "Ignore misspelled word")
