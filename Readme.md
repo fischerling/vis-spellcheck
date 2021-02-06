@@ -4,8 +4,8 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 
 ## Installation
 
-1. Download `spellcheck.lua` or clone this repository
-2. Load the plugin in your `visrc.lua` with `require(path/to/plugin/spellcheck)`
+1. Download `spellcheck.lua` or clone this repository into your plugin directory
+2. Load the plugin in your `visrc.lua` with `require(plugins/vis-spellcheck)`
 
 ## Usage
 
