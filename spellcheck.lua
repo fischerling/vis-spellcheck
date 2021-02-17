@@ -332,6 +332,10 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 
 	local suggestions = nil
 	local answer_line = so:match(".-\n(.-)\n.*")
+	if not answer_line then
+		return false
+	end
+
 	local first_char = answer_line:sub(0,1)
 	if first_char == "*" then
 		vis:info(file:content(range).." is correctly spelled")
