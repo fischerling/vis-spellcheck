@@ -40,7 +40,7 @@ spellcheck.check_tokens = {
 -- The returned string consists of each misspell followed by a newline.
 local function get_typos(range_or_text)
 	local cmd = spellcheck.list_cmd:format(spellcheck.lang)
-	local typos = nil
+	local typos
 	if type(range_or_text) == "string" then
 		local text = range_or_text
 		local tmp_name = os.tmpname()
@@ -48,7 +48,7 @@ local function get_typos(range_or_text)
 		local proc = assert(io.popen(full_cmd, "w"))
 		proc:write(text)
 		-- this error detection may need lua5.2
-		local success, reason, exit_code = proc:close()
+		local success, _, exit_code = proc:close()
 		if not success then
 			vis:info("calling " .. cmd .. " failed ("..exit_code..")")
 			return nil
@@ -60,7 +60,7 @@ local function get_typos(range_or_text)
 		os.remove(tmp_name)
 	else
 		local range = range_or_text
-		local ret, so, se = vis:pipe(vis.win.file, range, cmd)
+		local ret, so, _ = vis:pipe(vis.win.file, range, cmd)
 
 		if ret ~= 0 then
 			vis:info("calling " .. cmd .. " failed ("..ret..")")
@@ -106,7 +106,8 @@ local function typo_iter(text, typos, ignored)
 		end
 	end
 
-	return function(foo, bar)
+	return function()
+		local typo
 		repeat
 			typo = unfiltered_iterator(iter_state)
 		until(not typo or (typo ~= "" and not ignored[typo]))
@@ -153,8 +154,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 	local viewport = win.viewport
 	local viewport_text = win.file:content(viewport)
 
-	local typos = ""
-
+	local typos
 	if last_viewport == viewport_text then
 		typos = last_typos
 	else
@@ -164,7 +164,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 		end
 	end
 
-	for typo, start, finish in typo_iter(viewport_text, typos, ignored) do
+	for _, start, finish in typo_iter(viewport_text, typos, ignored) do
 		win:style(42, viewport.start + start - 1, viewport.start + finish)
 	end
 
@@ -184,13 +184,13 @@ local wrap_lex_func = function(old_lex_func)
 		-- quit early if the lexer already took to long
 		-- TODO: investigate further if timedout is actually set by the lexer.
 		--       As I understand lpeg.match used by lexer.lex timedout will always be nil
-		if timeout then
+		if timedout then
 			return tokens, timedout
 		end
 
 		local new_tokens = {}
 
-		local typos = ""
+		local typos
 		if last_data ~= data
 		then
 			typos = get_typos(data)
@@ -203,7 +203,7 @@ local wrap_lex_func = function(old_lex_func)
 		end
 
 		local i = 1
-		for typo, typo_start, typo_end in typo_iter(data, typos, ignored) do
+		for _, typo_start, typo_end in typo_iter(data, typos, ignored) do
 			repeat
 				-- no tokens left
 				if i > #tokens -1 then
@@ -280,7 +280,7 @@ local is_spellcheck_enabled = function()
 	return spellcheck.check_full_viewport[vis.win] or wrapped_lex_funcs[vis.win]
 end
 
-vis:map(vis.modes.NORMAL, "<C-w>e", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>e", function()
 	enable_spellcheck()
 end, "Enable spellchecking in the current window")
 
@@ -295,7 +295,7 @@ local disable_spellcheck = function()
 	end
 end
 
-vis:map(vis.modes.NORMAL, "<C-w>d", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>d", function()
 	disable_spellcheck()
 	-- force new highlight
 	vis.win:draw()
@@ -304,7 +304,7 @@ end, "Disable spellchecking in the current window")
 -- toggle spellchecking on <F7>
 -- <F7> is used by some word processors (LibreOffice) for spellchecking
 -- Thanks to @leorosa for the hint.
-vis:map(vis.modes.NORMAL, "<F7>", function(keys)
+vis:map(vis.modes.NORMAL, "<F7>", function()
 	if not is_spellcheck_enabled() then
 		enable_spellcheck()
 	else
@@ -314,7 +314,7 @@ vis:map(vis.modes.NORMAL, "<F7>", function(keys)
 	return 0
 end, "Toggle spellchecking in the current window")
 
-vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>w", function()
 	local win = vis.win
 	local file = win.file
 	local pos = win.selection.pos
@@ -330,12 +330,12 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 		return false
 	end
 
-	local suggestions = nil
 	local answer_line = so:match(".-\n(.-)\n.*")
 	if not answer_line then
 		return false
 	end
 
+	local suggestions
 	local first_char = answer_line:sub(0,1)
 	if first_char == "*" then
 		vis:info(file:content(range).." is correctly spelled")
@@ -351,7 +351,7 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	end
 
 	-- select a correction
-	local cmd = 'printf "' .. suggestions:gsub(", ", "\\n") .. '\\n" | vis-menu'
+	cmd = 'printf "' .. suggestions:gsub(", ", "\\n") .. '\\n" | vis-menu'
 	local status, correction = vis:pipe(file, {start = 0, finish = 0}, cmd)
 	if status == 0 then
 		-- trim correction
@@ -367,7 +367,7 @@ vis:map(vis.modes.NORMAL, "<C-w>w", function(keys)
 	return 0
 end, "Correct misspelled word")
 
-vis:map(vis.modes.NORMAL, "<C-w>i", function(keys)
+vis:map(vis.modes.NORMAL, "<C-w>i", function()
 	local win = vis.win
 	local file = win.file
 	local pos = win.selection.pos
@@ -393,7 +393,7 @@ vis:map(vis.modes.NORMAL, "<C-w>i", function(keys)
 	return 0
 end, "Ignore misspelled word")
 
-vis:option_register("spelllang", "string", function(value, toggle)
+vis:option_register("spelllang", "string", function(value)
 	spellcheck.lang = value
 	vis:info("Spellchecking language is now "..value)
 	-- force new highlight for full viewport
