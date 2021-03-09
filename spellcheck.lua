@@ -2,7 +2,11 @@
 -- Use of this source code is governed by a MIT license found in the LICENSE file.
 
 local spellcheck = {}
-spellcheck.lang = os.getenv("LANG"):sub(0,5) or "en_US"
+if os.getenv("LANG") then
+	spellcheck.lang = os.getenv("LANG"):sub(0,5)
+else
+	spellcheck.lang = "en_US"
+end
 local supress_stdout = " >/dev/null"
 local supress_stderr = " 2>/dev/null"
 local supress_output = supress_stdout .. supress_stderr
