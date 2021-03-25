@@ -25,6 +25,7 @@ else
   return nil
 end
 
+spellcheck.typo_style_id = 42
 spellcheck.typo_style = 'fore:red'
 spellcheck.check_full_viewport = {}
 spellcheck.disable_syntax_awareness = false
@@ -153,7 +154,7 @@ local last_viewport, last_data, last_typos = nil, '', ''
 
 vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
   if not spellcheck.check_full_viewport[win] or
-      not win:style_define(42, spellcheck.typo_style) then
+      not win:style_define(spellcheck.typo_style_id, spellcheck.typo_style) then
     return
   end
   local viewport = win.viewport
@@ -170,7 +171,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
   end
 
   for _, start, finish in typo_iter(viewport_text, typos, ignored) do
-    win:style(42, viewport.start + start - 1, viewport.start + finish)
+    win:style(spellcheck.typo_style_id, viewport.start + start - 1, viewport.start + finish)
   end
 
   last_viewport = viewport_text
