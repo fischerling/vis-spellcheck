@@ -171,7 +171,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
   end
 
   for _, start, finish in typo_iter(viewport_text, typos, ignored) do
-    win:style(spellcheck.typo_style_id, viewport.start + start - 1, viewport.start + finish)
+    win:style(spellcheck.typo_style_id, viewport.start + start - 1, viewport.start + finish - 1)
   end
 
   last_viewport = viewport_text
