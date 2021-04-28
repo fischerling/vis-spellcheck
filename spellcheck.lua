@@ -22,6 +22,7 @@ elseif os.execute('type hunspell' .. supress_output) then
   spellcheck.cmd = 'hunspell -d %s'
   spellcheck.list_cmd = 'hunspell -l -d %s'
 else
+  vis:info('WARNING: vis-spellcheck loaded but no spellchecker found')
   return nil
 end
 
