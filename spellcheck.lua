@@ -6,6 +6,7 @@ if os.getenv('LANG') then
 else
   spellcheck.default_lang = 'en_US'
 end
+
 spellcheck.get_lang = function ()
   if vis.win.file.spell_language then
     return vis.win.file.spell_language
@@ -13,6 +14,7 @@ spellcheck.get_lang = function ()
     return spellcheck.default_lang
   end
 end
+
 local supress_stdout = ' >/dev/null'
 local supress_stderr = ' 2>/dev/null'
 local supress_output = supress_stdout .. supress_stderr
@@ -434,5 +436,9 @@ vis:option_register('spelllang', 'string', function(value)
   last_data = nil
   return true
 end, 'The language used for spellchecking')
+
+vis:command_register('spelllang', function()
+  vis:info('The spellchecking language is ' .. spellcheck.get_lang())
+end, 'Print the language used for spellchecking')
 
 return spellcheck
