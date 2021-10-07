@@ -435,4 +435,8 @@ vis:option_register('spelllang', 'string', function(value)
   return true
 end, 'The language used for spellchecking')
 
+vis:command_register('spelllang', function(value)
+  vis:info('The spellchecking language is ' .. spellcheck.get_lang())
+end, 'Print the language used for spellchecking')
+
 return spellcheck
