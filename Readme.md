@@ -21,9 +21,9 @@ The module table returned from `require(...)` has some configuration options:
 
 * `cmd`: cmd that is passed to popen() and must return word corrections in Ispell format.
 	* default: `enchant -d %s` 
-* `list_cmd`: cmd that is passed to popen() and must output a list of misspelled words.
+* `list_cmd`: cmd that is passed to `popen()` and must output a list of misspelled words.
 	* default: `enchant -l -d %s` 
-* `lang`: The name of the used dictionary. `lang` is inserted in the cmd-strings at `%s`.
+* `default_lang`: The name of the used dictionary if the opened file does not specify one. The selected language is inserted in the cmd-strings at `%s`.
 	* default: `$LANG` or `en_US`
 * `typo_style`: The style string with which misspellings should be highlighted when using the _full viewport_ method
 	* default: `fore:red`
@@ -37,7 +37,7 @@ A possible configuration could look like this:
 	spellcheck = require(...)
 	spellcheck.cmd = "aspell -l %s -a"
 	spellcheck.list_cmd = "aspell list -l %s -a"
-	spellcheck.lang = "de_DE"
+	spellcheck.default_lang = "de_DE"
 
 Changing language during runtime:
 
