@@ -2,9 +2,16 @@
 -- Use of this source code is governed by a MIT license found in the LICENSE file.
 local spellcheck = {}
 if os.getenv('LANG') then
-  spellcheck.lang = os.getenv('LANG'):sub(0, 5)
+  spellcheck.default_lang = os.getenv('LANG'):sub(0, 5)
 else
-  spellcheck.lang = 'en_US'
+  spellcheck.default_lang = 'en_US'
+end
+spellcheck.get_lang = function ()
+  if vis.win.file.spell_language then
+    return vis.win.file.spell_language
+  else
+    return spellcheck.default_lang
+  end
 end
 local supress_stdout = ' >/dev/null'
 local supress_stderr = ' 2>/dev/null'
@@ -44,7 +51,7 @@ spellcheck.check_tokens = {
 -- to a temporary file. See http://lua-users.org/lists/lua-l/2007-10/msg00189.html.
 -- The returned string consists of each misspell followed by a newline.
 local function get_typos(range_or_text)
-  local cmd = spellcheck.list_cmd:format(spellcheck.lang)
+  local cmd = spellcheck.list_cmd:format(spellcheck.get_lang())
   local typos
   if type(range_or_text) == 'string' then
     local text = range_or_text
@@ -342,7 +349,7 @@ vis:map(vis.modes.NORMAL, '<C-w>w', function()
     return
   end
 
-  local cmd = spellcheck.cmd:format(spellcheck.lang)
+  local cmd = spellcheck.cmd:format(spellcheck.get_lang())
   local ret, so, se = vis:pipe(win.file, range, cmd)
   if ret ~= 0 then
     vis:message('calling ' .. cmd .. ' failed (' .. se .. ')')
@@ -419,7 +426,7 @@ vis:map(vis.modes.NORMAL, '<C-w>i', function()
 end, 'Ignore misspelled word')
 
 vis:option_register('spelllang', 'string', function(value)
-  spellcheck.lang = value
+  vis.win.file.spell_language = value
   vis:info('Spellchecking language is now ' .. value)
   -- force new highlight for full viewport
   last_viewport = nil
