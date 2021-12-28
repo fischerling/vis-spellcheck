@@ -7,7 +7,7 @@ else
   spellcheck.default_lang = 'en_US'
 end
 
-spellcheck.get_lang = function ()
+spellcheck.get_lang = function()
   if vis.win.file.spell_language then
     return vis.win.file.spell_language
   else
@@ -181,7 +181,8 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
   end
 
   for _, start, finish in typo_iter(viewport_text, typos, ignored) do
-    win:style(spellcheck.typo_style_id, viewport.start + start - 1, viewport.start + finish - 1)
+    win:style(spellcheck.typo_style_id, viewport.start + start - 1,
+              viewport.start + finish - 1)
   end
 
   last_viewport = viewport_text
