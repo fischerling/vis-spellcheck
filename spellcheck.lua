@@ -1,9 +1,8 @@
 -- Copyright (c) 2017-2019 Florian Fischer. All rights reserved.
 -- Use of this source code is governed by a MIT license found in the LICENSE file.
 local spellcheck = {}
-if os.getenv('LANG') then
-  spellcheck.default_lang = os.getenv('LANG'):sub(0, 5)
-else
+spellcheck.default_lang = (os.getenv('LANG') or ''):gsub('[.].*', '')
+if not spellcheck.default_lang:match('^[a-z][a-z]_[A-Z][A-Z]$') then
   spellcheck.default_lang = 'en_US'
 end
 
