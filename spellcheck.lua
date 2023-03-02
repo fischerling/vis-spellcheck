@@ -125,32 +125,33 @@ local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
     until (not typo or (typo ~= '' and not ignored[typo]))
 
     if typo then
-      -- to prevent typos from being found in correct words before them
-      -- ("stuff stuf", "broken ok", ...)
-      -- we match typos only when they are enclosed in non-letter characters.
-      local start, finish = text:find('[%A]' .. escape_lua_pattern(typo) ..
-                                          '[%A]', index)
-      -- typo was not found by our pattern this means it must be either
-      -- the first or last word in the text
-      if not start then
-        -- check start of text
+      local start, finish
+      -- special case for typos at the beginning of the text
+      -- Leading typos are not found by our used pattern [%A]typo[%A].
+      -- To prevent typos to be skipped if the leading typo accours an
+      -- additional time in the text we need this special case
+      if index == 1 and text:sub(1, #typo) == typo then
         start = 1
         finish = #typo
-        -- typo is not the beginning must be the end of text
-        if text:sub(start, finish) ~= typo then
+      else
+        -- to prevent typos from being found in correct words before them
+        -- ("stuff stuf", "broken ok", ...)
+        -- we match typos only when they are enclosed in non-letter characters.
+        local pattern = '[%A]' .. escape_lua_pattern(typo) .. '[%A]'
+        start, finish = text:find(pattern, index)
+        if start then -- our pattern [%A]typo[%A] found it
+          start = start + 1 -- ignore leading non letter char
+          finish = finish - 1 -- ignore trailing non letter char
+        else -- typo was not found by our pattern this means it must be the last word
           start = #text - #typo + 1
           finish = start + #typo - 1
-        end
 
-        if text:sub(start, finish) ~= typo then
-          vis:info(string.format(
+          if text:sub(start, finish) ~= typo then
+            vis:info(string.format(
                        'can\'t find typo %s after %d. Please report this bug.',
                        typo, index))
+          end
         end
-        -- our pettern [%A]typo[%A] found it
-      else
-        start = start + 1 -- ignore leading non letter char
-        finish = finish - 1 -- ignore trailing non letter char
       end
       index = finish
 
