@@ -14,6 +14,7 @@ A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis)
 + To toggle highlighting press `<F7>` in normal mode.
 + To correct the word under the cursor press `<Ctrl+w>w` in normal mode.
 + To ignore the word under the cursor press `<Ctrl+w>i` in normal mode.
++ To add the word under the cursor to the user dictionary press '<Ctrl+w>a' in normal mode.
 
 ## Configuration
 
