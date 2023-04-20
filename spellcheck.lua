@@ -396,7 +396,7 @@ vis:map(vis.modes.NORMAL, '<C-w>w', function()
   return 0
 end, 'Correct misspelled word')
 
-vis:map(vis.modes.NORMAL, '<C-w>i', function()
+local ignore = function()
   local win = vis.win
   local file = win.file
   local pos = win.selection.pos
@@ -425,6 +425,10 @@ vis:map(vis.modes.NORMAL, '<C-w>i', function()
   end
 
   win:draw()
+end
+
+vis:map(vis.modes.NORMAL, '<C-w>i', function()
+  ignore()
   return 0
 end, 'Ignore misspelled word')
 
@@ -442,7 +446,14 @@ vis:map(vis.modes.NORMAL, '<C-w>a', function()
 
   local cmd = string.format(':!echo "*%s\\n#" | %s', file:content(range),
                             spellcheck.cmd:format(spellcheck.get_lang()))
-  return vis:command(cmd)
+
+  if not vis:command(cmd) then
+    vis:info('executing vis command: "' .. cmd .. '" failed')
+  end
+
+  -- ignore the added word to prevent it from being highlighted in this session
+  ignore()
+  return 0
 end, 'Add word to user dictionary')
 
 vis:option_register('spelllang', 'string', function(value)
