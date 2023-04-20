@@ -428,6 +428,23 @@ vis:map(vis.modes.NORMAL, '<C-w>i', function()
   return 0
 end, 'Ignore misspelled word')
 
+vis:map(vis.modes.NORMAL, '<C-w>a', function()
+  local file = vis.win.file
+  local pos = vis.win.selection.pos
+  if not pos then
+    return
+  end
+
+  local range = file:text_object_word(pos);
+  if not range or range.start == range.finish then
+    return
+  end
+
+  local cmd = string.format(':!echo "*%s\\n#" | %s', file:content(range),
+                            spellcheck.cmd:format(spellcheck.get_lang()))
+  return vis:command(cmd)
+end, 'Add word to user dictionary')
+
 vis:option_register('spelllang', 'string', function(value)
   vis.win.file.spell_language = value
   vis:info('Spellchecking language is now ' .. value)
