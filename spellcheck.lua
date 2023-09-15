@@ -187,13 +187,6 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
 
   last_viewport = viewport_text
   last_typos = typos
-  -- TODO: think about returning true here
-  -- http://martanne.github.io/vis/doc/index.html#Events
-  -- The vis documentation states that a no further event handlers are called if one
-  -- returns not nil
-  -- Should we terminate the WIN_HIGHLIGHT event handling if we are ready highltighting
-  -- typos ?
-  return true
 end)
 
 local wrapped_lex_funcs = {}
