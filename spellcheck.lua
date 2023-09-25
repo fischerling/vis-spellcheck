@@ -7,8 +7,8 @@ if not spellcheck.default_lang:match('^[a-z][a-z]_[A-Z][A-Z]$') then
 end
 
 spellcheck.get_lang = function()
-  if vis.win.file.spell_language then
-    return vis.win.file.spell_language
+  if vis.win.file.spelling_language then
+    return vis.win.file.spelling_language
   else
     return spellcheck.default_lang
   end
