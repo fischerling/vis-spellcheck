@@ -450,7 +450,7 @@ vis:map(vis.modes.NORMAL, '<C-w>a', function()
 end, 'Add word to user dictionary')
 
 vis:option_register('spelllang', 'string', function(value)
-  vis.win.file.spell_language = value
+  vis.win.file.spelling_language = value
   vis:info('Spellchecking language is now ' .. value)
   -- force new highlight for full viewport
   last_viewport = nil
