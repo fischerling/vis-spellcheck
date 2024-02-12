@@ -331,6 +331,9 @@ vis:map(vis.modes.NORMAL, '<F7>', function()
 end, 'Toggle spellchecking in the current window')
 
 vis:map(vis.modes.NORMAL, '<C-w>w', function()
+  -- Turn on highlighting
+  enable_spellcheck()
+
   local win = vis.win
   local file = win.file
   local pos = win.selection.pos
