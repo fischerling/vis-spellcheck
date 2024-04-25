@@ -195,15 +195,8 @@ local wrapped_lex_funcs = {}
 local wrap_lex_func = function(old_lex_func)
   local old_new_tokens = {}
 
-  return function(lexer, data, index, redrawtime_max)
-    local tokens, timedout = old_lex_func(lexer, data, index, redrawtime_max)
-
-    -- quit early if the lexer already took to long
-    -- TODO: investigate further if timedout is actually set by the lexer.
-    --       As I understand lpeg.match used by lexer.lex timedout will always be nil
-    if timedout then
-      return tokens, timedout
-    end
+  return function(lexer, data, index)
+    local tokens = old_lex_func(lexer, data, index)
 
     local new_tokens = {}
 
@@ -211,7 +204,7 @@ local wrap_lex_func = function(old_lex_func)
     if last_data ~= data then
       typos = get_typos(data)
       if not typos then
-        return tokens, timedout
+        return tokens
       end
       last_data = data
     else
@@ -266,7 +259,7 @@ local wrap_lex_func = function(old_lex_func)
     end
 
     old_new_tokens = new_tokens
-    return new_tokens, timedout
+    return new_tokens
   end
 end
 
