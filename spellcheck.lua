@@ -167,7 +167,8 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
       not win:style_define(spellcheck.typo_style_id, spellcheck.typo_style) then
     return
   end
-  local viewport = win.viewport
+  -- Be backward compatible with vis < v0.9
+  local viewport = win.viewport.bytes or win.viewport
   local viewport_text = win.file:content(viewport)
 
   local typos
