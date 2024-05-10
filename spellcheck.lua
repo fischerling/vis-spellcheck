@@ -169,6 +169,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
   end
   -- Be backward compatible with vis < v0.9
   local viewport = win.viewport.bytes or win.viewport
+  if not viewport then return end
   local viewport_text = win.file:content(viewport)
 
   local typos
