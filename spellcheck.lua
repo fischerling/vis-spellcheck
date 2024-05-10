@@ -453,7 +453,7 @@ vis:option_register('spelllang', 'string', function(value)
   -- force new highlight for full viewport
   last_viewport = nil
   -- force new highlight for syntax aware
-  last_data = nil
+  last_data = ''
   return true
 end, 'The language used for spellchecking')
 
