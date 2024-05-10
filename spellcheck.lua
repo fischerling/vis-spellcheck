@@ -45,7 +45,7 @@ spellcheck.check_tokens = {
   [vis.lexers.DEFAULT] = true,
 }
 
--- Return nil or a string of misspelled word in a specific file range or text
+-- Return nil or a sequence of misspelled words in a specific file range or text
 -- by calling the spellchecker's list command.
 -- If given a range we will use vis:pipe to get our typos from the spellchecker.
 -- If a string was passed we call the spellchecker ourself and redirect its stdout
@@ -89,7 +89,7 @@ end
 local ignored = {}
 
 -- Return an iterator over all not ignored typos and their positions in text.
--- The returned iterator is a self contained statefull iterator function closure.
+-- The returned iterator is a self contained stateful iterator function closure.
 -- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
   local index = 1
@@ -128,7 +128,7 @@ local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
       local start, finish
       -- special case for typos at the beginning of the text
       -- Leading typos are not found by our used pattern [%A]typo[%A].
-      -- To prevent typos to be skipped if the leading typo accours an
+      -- To prevent typos to be skipped if the leading typo occurs an
       -- additional time in the text we need this special case
       if index == 1 and text:sub(1, #typo) == typo then
         start = 1
@@ -283,7 +283,7 @@ local enable_spellcheck = function()
     end
   end
 
-  -- fallback check spellcheck the full viewport
+  -- fallback: spellcheck the full viewport
   spellcheck.check_full_viewport[vis.win] = true
 end
 
