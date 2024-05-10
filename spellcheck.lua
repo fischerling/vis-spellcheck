@@ -347,27 +347,27 @@ vis:map(vis.modes.NORMAL, '<C-w>w', function()
   local ret, so, se = vis:pipe(win.file, range, cmd)
   if ret ~= 0 then
     vis:message('calling ' .. cmd .. ' failed (' .. se .. ')')
-    return false
+    return
   end
 
   local answer_line = so:match('.-\n(.-)\n.*')
   if not answer_line then
-    return false
+    return
   end
 
   local suggestions
   local first_char = answer_line:sub(0, 1)
   if first_char == '*' then
     vis:info(file:content(range) .. ' is correctly spelled')
-    return true
+    return
   elseif first_char == '#' then
     vis:info('No corrections available for ' .. file:content(range))
-    return false
+    return
   elseif first_char == '&' then
     suggestions = answer_line:match('& %S+ %d+ %d+: (.*)')
   else
     vis:info('Unknown answer: ' .. answer_line)
-    return false
+    return
   end
 
   -- select a correction
