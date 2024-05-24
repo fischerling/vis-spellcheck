@@ -39,11 +39,20 @@ spellcheck.typo_style = 'fore:red'
 spellcheck.check_full_viewport = {}
 spellcheck.disable_syntax_awareness = false
 
-spellcheck.check_tokens = {
-  [vis.lexers.STRING] = true,
-  [vis.lexers.COMMENT] = true,
-  [vis.lexers.DEFAULT] = true,
-}
+-- Only use tokens for spellchecking if they are available.
+-- If vis is used in setups without lua-lpeg the lexer tokens are not available.
+if vis.lexers then
+  spellcheck.check_tokens = {}
+  if vis.lexers.STRING then
+    spellcheck.check_tokens[vis.lexers.STRING] = true
+  end
+  if vis.lexers.COMMENT then
+    spellcheck.check_tokens[vis.lexers.COMMENT] = true
+  end
+  if vis.lexers.DEFAULT then
+    spellcheck.check_tokens[vis.lexers.DEFAULT] = true
+  end
+end
 
 -- Return nil or a sequence of misspelled words in a specific file range or text
 -- by calling the spellchecker's list command.
