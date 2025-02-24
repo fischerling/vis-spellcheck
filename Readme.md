@@ -26,6 +26,9 @@ The module table returned from `require(...)` has some configuration options:
 	* default: `enchant -l -d %s` 
 * `default_lang`: The name of the used dictionary if the opened file does not specify one. The selected language is inserted in the cmd-strings at `%s`.
 	* default: `$LANG` or `en_US`
+* `spelling_autoenable`: Enable automatic enabling of spellchecker when spelling is available
+  (via `spelling_language` setting in .editorconfig) without any additional user action.
+	* default: `false`
 * `typo_style`: The style string with which misspellings should be highlighted when using the _full viewport_ method
 	* default: `fore:red`
 * `check_tokens`: A table mapping all token names we consider for spellchecking to true

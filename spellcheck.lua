@@ -6,6 +6,8 @@ if not spellcheck.default_lang:match('^[a-z][a-z]_[A-Z][A-Z]$') then
   spellcheck.default_lang = 'en_US'
 end
 
+spellcheck.spelling_autoenable = false
+
 spellcheck.get_lang = function()
   if vis.win.file.spelling_language then
     return vis.win.file.spelling_language
@@ -303,6 +305,12 @@ end
 vis:map(vis.modes.NORMAL, '<C-w>e', function()
   enable_spellcheck()
 end, 'Enable spellchecking in the current window')
+
+vis.events.subscribe(vis.events.WIN_OPEN, function(win)
+  if vis.win.file.spelling_language and spellcheck.spelling_autoenable then
+    enable_spellcheck()
+  end
+end)
 
 local disable_spellcheck = function()
   local old_lex_func = wrapped_lex_funcs[vis.win]
