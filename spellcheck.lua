@@ -470,4 +470,18 @@ vis:command_register('spelllang', function()
   vis:info('The spellchecking language is ' .. spellcheck.get_lang())
 end, 'Print the language used for spellchecking')
 
+vis:command_register('spell+', function()
+  enable_spellcheck()
+end, 'Enable spellchecking')
+
+vis:command_register('spell', function()
+  if not is_spellcheck_enabled() then
+    enable_spellcheck()
+  else
+    disable_spellcheck()
+    vis.win:draw()
+  end
+  return 0
+end, 'Toggle spellchecking in the current window')
+
 return spellcheck
