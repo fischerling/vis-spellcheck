@@ -9,11 +9,11 @@ end
 spellcheck.spelling_autoenable = false
 
 spellcheck.get_lang = function()
-  if vis.win.file.spelling_language then
-    return vis.win.file.spelling_language
-  else
-    return spellcheck.default_lang
-  end
+	if vis.win and vis.win.file.spelling_language then
+		return vis.win.file.spelling_language
+	else
+		return spellcheck.default_lang
+	end
 end
 
 local supress_stdout = ' >/dev/null'
