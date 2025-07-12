@@ -9,11 +9,11 @@ end
 spellcheck.spelling_autoenable = false
 
 spellcheck.get_lang = function()
-	if vis.win and vis.win.file.spelling_language then
-		return vis.win.file.spelling_language
-	else
-		return spellcheck.default_lang
-	end
+  if vis.win and vis.win.file.spelling_language then
+    return vis.win.file.spelling_language
+  else
+    return spellcheck.default_lang
+  end
 end
 
 local supress_stdout = ' >/dev/null'
@@ -306,7 +306,7 @@ vis:map(vis.modes.NORMAL, '<C-w>e', function()
   enable_spellcheck()
 end, 'Enable spellchecking in the current window')
 
-vis.events.subscribe(vis.events.WIN_OPEN, function(win)
+vis.events.subscribe(vis.events.WIN_OPEN, function()
   if vis.win.file.spelling_language and spellcheck.spelling_autoenable then
     enable_spellcheck()
   end
