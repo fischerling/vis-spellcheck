@@ -3,10 +3,10 @@
 local vis = _G.vis
 
 local spellcheck = {}
-spellcheck.default_lang = (os.getenv('VIS_SPELLLANG') or os.getenv('LANG') or ''):gsub('[.].*', '')
-if not spellcheck.default_lang:match('^[a-z][a-z]_[A-Z][A-Z]$') then
-  spellcheck.default_lang = 'en_US'
-end
+spellcheck.default_lang = string.match(
+  os.getenv('VIS_SPELLLANG') or os.getenv('LANG') or ''
+  , "^%l%l_%u%u"
+) or 'en_US'
 
 spellcheck.spelling_autoenable = false
 
