@@ -15,19 +15,23 @@ spellcheck.get_lang = function()
     or spellcheck.default_lang
 end
 
-local supress_stdout = ' >/dev/null'
-local supress_stderr = ' 2>/dev/null'
-local supress_output = supress_stdout .. supress_stderr
-if os.execute('type enchant' .. supress_output) then
+local which do
+  local path = os.getenv"PATH":gsub(":","/?;") .. "/?"
+  function which(executable)
+    return package.searchpath(executable, path, "", "")
+  end
+end
+
+if which"enchant" then
   spellcheck.cmd = 'enchant -d %s -a'
   spellcheck.list_cmd = 'enchant -l -d %s'
-elseif os.execute('type enchant-2' .. supress_output) then
+elseif which"enchant-2" then
   spellcheck.cmd = 'enchant-2 -d %s -a'
   spellcheck.list_cmd = 'enchant-2 -l -d %s'
-elseif os.execute('type aspell' .. supress_output) then
+elseif which"aspell" then
   spellcheck.cmd = 'aspell pipe -l %s'
   spellcheck.list_cmd = 'aspell list -l %s'
-elseif os.execute('type hunspell' .. supress_output) then
+elseif which"hunspell" then
   spellcheck.cmd = 'hunspell -d %s'
   spellcheck.list_cmd = 'hunspell -l -d %s'
 else
@@ -54,6 +58,8 @@ if vis.lexers then
     spellcheck.check_tokens[vis.lexers.DEFAULT] = true
   end
 end
+
+local supress_stderr = ' 2>/dev/null'
 
 -- Return nil or a sequence of misspelled words in a specific file range or text
 -- by calling the spellchecker's list command.
