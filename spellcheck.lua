@@ -120,41 +120,40 @@ local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
     local typo
     repeat
       typo = unfiltered_iterator(iter_state)
-    until (not typo or (typo ~= '' and not ignored[typo]))
+      if not typo then return end
+    until typo ~= '' and not ignored[typo]
 
-    if typo then
-      local start, finish
-      -- special case for typos at the beginning of the text
-      -- Leading typos are not found by our used pattern [%A]typo[%A].
-      -- To prevent typos to be skipped if the leading typo occurs an
-      -- additional time in the text we need this special case
-      if index == 1 and text:sub(1, #typo) == typo then
-        start = 1
-        finish = #typo
-      else
-        -- to prevent typos from being found in correct words before them
-        -- ("stuff stuf", "broken ok", ...)
-        -- we match typos only when they are enclosed in non-letter characters.
-        local pattern = '[%A]' .. escape_lua_pattern(typo) .. '[%A]'
-        start, finish = text:find(pattern, index)
-        if start then -- our pattern [%A]typo[%A] found it
-          start = start + 1 -- ignore leading non letter char
-          finish = finish - 1 -- ignore trailing non letter char
-        else -- typo was not found by our pattern this means it must be the last word
-          start = #text - #typo + 1
-          finish = start + #typo - 1
+    local start, finish
+    -- special case for typos at the beginning of the text
+    -- Leading typos are not found by our used pattern [%A]typo[%A].
+    -- To prevent typos to be skipped if the leading typo occurs an
+    -- additional time in the text we need this special case
+    if index == 1 and text:sub(1, #typo) == typo then
+      start = 1
+      finish = #typo
+    else
+      -- to prevent typos from being found in correct words before them
+      -- ("stuff stuf", "broken ok", ...)
+      -- we match typos only when they are enclosed in non-letter characters.
+      local pattern = '[%A]' .. escape_lua_pattern(typo) .. '[%A]'
+      start, finish = text:find(pattern, index)
+      if start then -- our pattern [%A]typo[%A] found it
+        start = start + 1 -- ignore leading non letter char
+        finish = finish - 1 -- ignore trailing non letter char
+      else -- typo was not found by our pattern this means it must be the last word
+        start = #text - #typo + 1
+        finish = start + #typo - 1
 
-          if text:sub(start, finish) ~= typo then
-            vis:info(string.format(
-                       'can\'t find typo %s after %d. Please report this bug.',
-                       typo, index))
-          end
+        if text:sub(start, finish) ~= typo then
+          vis:info(string.format(
+                     'can\'t find typo %s after %d. Please report this bug.',
+                     typo, index))
         end
       end
-      index = finish
-
-      return typo, start, finish
     end
+    index = finish
+
+    return typo, start, finish
   end
 end
 
