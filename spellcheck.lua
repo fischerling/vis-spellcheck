@@ -1,5 +1,7 @@
 -- Copyright (c) 2017-2019 Florian Fischer. All rights reserved.
 -- Use of this source code is governed by a MIT license found in the LICENSE file.
+local vis = _G.vis
+
 local spellcheck = {}
 spellcheck.default_lang = (os.getenv('VIS_SPELLLANG') or os.getenv('LANG') or ''):gsub('[.].*', '')
 if not spellcheck.default_lang:match('^[a-z][a-z]_[A-Z][A-Z]$') then
