@@ -114,14 +114,14 @@ end
 -- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
   local index = 1
-  local unfiltered_iterator, iter_state = typos:gmatch'%S+'
+  local unfiltered_iterator, iter_state = typos:gmatch'[^\n]+'
 
   return function()
     local typo
     repeat
       typo = unfiltered_iterator(iter_state)
       if not typo then return end
-    until typo ~= '' and not ignored[typo]
+    until not ignored[typo]
 
     local start, finish
     -- special case for typos at the beginning of the text
