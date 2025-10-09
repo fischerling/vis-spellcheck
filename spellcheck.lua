@@ -174,9 +174,6 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
     typos = last_typos
   else
     typos = get_typos(viewport) or ''
-    if not typos then
-      return
-    end
   end
 
   for start, finish in typo_iter(viewport_text, typos, ignored) do
