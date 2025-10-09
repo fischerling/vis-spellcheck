@@ -11,11 +11,8 @@ spellcheck.default_lang = string.match(
 spellcheck.spelling_autoenable = false
 
 spellcheck.get_lang = function()
-  if vis.win and vis.win.file.spelling_language then
-    return vis.win.file.spelling_language
-  else
-    return spellcheck.default_lang
-  end
+  return vis.win and vis.win.file.spelling_language
+    or spellcheck.default_lang
 end
 
 local supress_stdout = ' >/dev/null'
