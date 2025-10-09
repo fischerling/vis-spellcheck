@@ -135,7 +135,7 @@ local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
       -- to prevent typos from being found in correct words before them
       -- ("stuff stuf", "broken ok", ...)
       -- we match typos only when they are enclosed in non-letter characters.
-      local pattern = '[%A]' .. escape_lua_pattern(typo) .. '[%A]'
+      local pattern = '%A' .. escape_lua_pattern(typo) .. '%A'
       start, finish = text:find(pattern, index)
       if start then -- our pattern [%A]typo[%A] found it
         start = start + 1 -- ignore leading non letter char
