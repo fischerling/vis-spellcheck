@@ -153,7 +153,7 @@ local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
     end
     index = finish
 
-    return typo, start, finish
+    return start, finish
   end
 end
 
@@ -179,7 +179,7 @@ vis.events.subscribe(vis.events.WIN_HIGHLIGHT, function(win)
     end
   end
 
-  for _, start, finish in typo_iter(viewport_text, typos, ignored) do
+  for start, finish in typo_iter(viewport_text, typos, ignored) do
     win:style(spellcheck.typo_style_id, viewport.start + start - 1,
               viewport.start + finish - 1)
   end
@@ -210,7 +210,7 @@ local wrap_lex_func = function(old_lex_func)
     end
 
     local i = 1
-    for _, typo_start, typo_end in typo_iter(data, typos, ignored) do
+    for typo_start, typo_end in typo_iter(data, typos, ignored) do
       repeat
         -- no tokens left
         if i > #tokens - 1 then
