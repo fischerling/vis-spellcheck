@@ -249,7 +249,7 @@ local wrap_lex_func = function(old_lex_func)
     end
 
     -- add tokens left after we handled all typos
-    for i = i, #tokens, 1 do -- luacheck: ignore i
+    for i = i, #tokens do -- luacheck: ignore i
       table.insert(new_tokens, tokens[i])
     end
 
