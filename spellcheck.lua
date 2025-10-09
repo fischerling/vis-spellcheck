@@ -104,35 +104,17 @@ end
 -- plugin global list of ignored typos
 local ignored = {}
 
+-- escapes operators of pattern
+local escape_lua_pattern = function (s)
+  return s:gsub("[*$^().?+%%%[%]-]","%%%0")
+end
+
 -- Return an iterator over all not ignored typos and their positions in text.
 -- The returned iterator is a self contained stateful iterator function closure.
 -- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
   local index = 1
   local unfiltered_iterator, iter_state = typos:gmatch('(.-)\n')
-
-  -- see https://stackoverflow.com/questions/6705872/how-to-escape-a-variable-in-lua
-  local escape_lua_pattern
-  do
-    local matches = {
-      ['^'] = '%^',
-      ['$'] = '%$',
-      ['('] = '%(',
-      [')'] = '%)',
-      ['%'] = '%%',
-      ['.'] = '%.',
-      ['['] = '%[',
-      [']'] = '%]',
-      ['*'] = '%*',
-      ['+'] = '%+',
-      ['-'] = '%-',
-      ['?'] = '%?',
-    }
-
-    escape_lua_pattern = function(s)
-      return (s:gsub('.', matches))
-    end
-  end
 
   return function()
     local typo
