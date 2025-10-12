@@ -16,22 +16,22 @@ spellcheck.get_lang = function()
 end
 
 local which do
-  local path = os.getenv"PATH":gsub(":","/?;") .. "/?"
+  local path = os.getenv("PATH"):gsub(":","/?;") .. "/?"
   function which(executable)
     return package.searchpath(executable, path, "", "")
   end
 end
 
-if which"enchant" then
+if which("enchant") then
   spellcheck.cmd = 'enchant -d %s -a'
   spellcheck.list_cmd = 'enchant -l -d %s'
-elseif which"enchant-2" then
+elseif which("enchant-2") then
   spellcheck.cmd = 'enchant-2 -d %s -a'
   spellcheck.list_cmd = 'enchant-2 -l -d %s'
-elseif which"aspell" then
+elseif which("aspell") then
   spellcheck.cmd = 'aspell pipe -l %s'
   spellcheck.list_cmd = 'aspell list -l %s'
-elseif which"hunspell" then
+elseif which("hunspell") then
   spellcheck.cmd = 'hunspell -d %s'
   spellcheck.list_cmd = 'hunspell -l -d %s'
 else
@@ -114,7 +114,7 @@ end
 -- Which will return the next typo and its start and finish in the text, starting by 1.
 local function typo_iter(text, typos, ignored) -- luacheck: ignore ignored
   local index = 1
-  local unfiltered_iterator, iter_state = typos:gmatch'[^\n]+'
+  local unfiltered_iterator, iter_state = typos:gmatch('[^\n]+')
 
   return function()
     local typo
