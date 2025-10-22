@@ -61,6 +61,9 @@ end
 
 local supress_stderr = ' 2>/dev/null'
 
+-- Detect if vis supports piping a buffer to an external command.
+local vis_supports_pipe_buf = pcall(vis.pipe, vis, 'foo', 'true', false)
+
 -- Return nil or a sequence of misspelled words in a specific file range or text
 -- by calling the spellchecker's list command.
 -- If given a range we will use vis:pipe to get our typos from the spellchecker.
@@ -70,7 +73,8 @@ local supress_stderr = ' 2>/dev/null'
 local function get_typos(range_or_text)
   local cmd = spellcheck.list_cmd:format(spellcheck.get_lang())
   local typos
-  if type(range_or_text) == 'string' then
+  -- Legacy fallback using a temporary file as output
+  if type(range_or_text) == 'string' and not vis_supports_pipe_buf then
     local text = range_or_text
     local tmp_name = os.tmpname()
     local full_cmd = cmd .. '> ' .. tmp_name .. supress_stderr
@@ -88,8 +92,12 @@ local function get_typos(range_or_text)
     tmp_file:close()
     os.remove(tmp_name)
   else
-    local range = range_or_text
-    local ret, so, _ = vis:pipe(vis.win.file, range, cmd)
+    local ret, so
+    if type(range_or_text) == 'string' then
+      ret, so = vis:pipe(range_or_text, cmd)
+    else
+      ret, so = vis:pipe(vis.win.file, range_or_text, cmd)
+    end
 
     if ret ~= 0 then
       vis:info('calling ' .. cmd .. ' failed (' .. ret .. ')')
