@@ -64,6 +64,24 @@ local supress_stderr = ' 2>/dev/null'
 -- Detect if vis supports piping a buffer to an external command.
 local vis_supports_pipe_buf = pcall(vis.pipe, vis, 'foo', 'true', false)
 
+--- Detect if vis supports file snapshots via lua
+-- This is a function to lazily evaluate vis' capacity, because during startup
+-- there is no file available.
+local vis_supports_file_snapshot
+do
+  local _vis_supports_file_snapshot
+
+  vis_supports_file_snapshot = function()
+    if _vis_supports_file_snapshot ~= nil then
+      return _vis_supports_file_snapshot
+    end
+    if vis.win and vis.win.file and _vis_supports_file_snapshot == nil then
+      _vis_supports_file_snapshot = pcall(vis.win.file.snapshot, vis.win.file)
+    end
+    return _vis_supports_file_snapshot
+  end
+end
+
 -- Return nil or a sequence of misspelled words in a specific file range or text
 -- by calling the spellchecker's list command.
 -- If given a range we will use vis:pipe to get our typos from the spellchecker.
@@ -384,6 +402,9 @@ vis:map(vis.modes.NORMAL, '<C-w>w', function()
   if status == 0 then
     -- trim correction
     correction = correction:match('^%s*(.-)%s*$')
+    if vis_supports_file_snapshot() then
+      win.file:snapshot()
+    end
     win.file:delete(range)
     win.file:insert(range.start, correction)
   end
