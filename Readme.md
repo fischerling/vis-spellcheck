@@ -47,3 +47,7 @@ Changing language during runtime:
 
 	:set spelllang en_US
 
+## License
+
+`vis-spellcheck` is licensed under the terms of the MIT license.
+A copy of the license can be found in the `LICENSE` file.
