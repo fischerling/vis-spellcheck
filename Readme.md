@@ -2,6 +2,8 @@
 
 A spellchecking lua plugin for the [vis editor](https://github.com/martanne/vis).
 
+# This repository is abandoned. The upstream moved to [codeberg.org](https://codeberg.org/muhq/vis-spellcheck).
+
 ## Installation
 
 1. Download `spellcheck.lua` or clone this repository into your plugin directory
